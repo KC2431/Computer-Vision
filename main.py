@@ -32,62 +32,111 @@ if __name__ == "__main__":
     elif args.dataSet == 'CIFAR10' and args.model in ['ResNet50', 'VGG19']:
         raise ValueError(f"Can't use model {args.model} for dataset {args.dataset}.")   
     elif args.dataSet == 'MNIST' and args.model in ['ResNet50', 'VGG19', 'ResNet20', 'WideResNet']:
-        raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}") 
+        raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}")
+
     #-------------------------------- Reading Data --------------------------------#
     
+    # Here, the first value is the training transformation and the second one is the test transformation
     modelTrainingTransforms = {
 
-        'VGG19': transforms.Compose([
-                    transforms.Resize ( (150 , 150) ),
-                    transforms.RandomHorizontalFlip(p=0.5),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-                ]),
+        'VGG19': [ 
+                    transforms.Compose([
+                           transforms.Resize(224),
+                           transforms.RandomRotation(5),
+                           transforms.RandomHorizontalFlip(0.5),
+                           transforms.RandomCrop(224, padding=10),
+                           transforms.ToTensor(),
+                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                std=[0.229, 0.224, 0.225])
+                       ]) , 
+                    
+                    transforms.Compose([
+                           transforms.Resize(224),
+                           transforms.ToTensor(),
+                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                std=[0.229, 0.224, 0.225])
+                       ])
+                    ],
         
-        'ResNet50': transforms.Compose([
-                        transforms.Resize(256),
-                        transforms.RandomHorizontalFlip(),
-                        transforms.RandomVerticalFlip(),
-                        transforms.RandomRotation(degrees=45),
-                        transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-                        transforms.CenterCrop(224),
-                        transforms.ToTensor(),
-                        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-                    ]),
+        'ResNet50': [
+                        transforms.Compose([
+                           transforms.Resize(224),
+                           transforms.RandomRotation(5),
+                           transforms.RandomHorizontalFlip(0.5),
+                           transforms.RandomCrop(224, padding = 10),
+                           transforms.ToTensor(),
+                           transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+                                                std=[0.229, 0.224, 0.225])
+                       ]),
+
+                        transforms.Compose([
+                           transforms.Resize(224),
+                           transforms.CenterCrop(224),
+                           transforms.ToTensor(),
+                           transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+                                                std=[0.229, 0.224, 0.225])
+                       ])
+                        ],
         
-        'ResNet20':  transforms.Compose([
-                        transforms.RandomHorizontalFlip(),
-                        transforms.RandomCrop(32, 4),
-                        transforms.ToTensor(),
-                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                std=[0.229, 0.224, 0.225]),
-                    ]),
+        'ResNet20':  [
+                            transforms.Compose([
+                                transforms.RandomHorizontalFlip(),
+                                transforms.RandomCrop(32, 4),
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                        std=[0.229, 0.224, 0.225])
+                            ]),
+
+                            transforms.Compose([
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                    std=[0.229, 0.224, 0.225])  
+                            ])
+
+                        ],   
+
+        'WideResNet': [     
+                            transforms.Compose([
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                    std=[0.229, 0.224, 0.225])  
+                            ]),
+
+                            transforms.Compose([
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                    std=[0.229, 0.224, 0.225])  
+                            ]) 
+                        ],
         
-        'WideResNet': transforms.Compose([
-                        transforms.ToTensor(),
-                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                std=[0.229, 0.224, 0.225])  
-                    ]),
-        
-        'BasicCNN': transforms.Compose([
-                        transforms.ToTensor(),
-                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                std=[0.229, 0.224, 0.225])  
-                    ]) 
+        'BasicCNN': [     
+                            transforms.Compose([
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                    std=[0.229, 0.224, 0.225])  
+                            ]),
+
+                            transforms.Compose([
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                    std=[0.229, 0.224, 0.225])  
+                            ]) 
+                        ] 
+    
     }
 
     training_data = datasets.MNIST(
         root="data",
         train=True,
         download=True,
-        transform=ToTensor()
+        transform=modelTrainingTransforms[args.model][0]
     )
 
     test_data = datasets.MNIST(
         root="data",
         train=False,
         download=True,
-        transform=ToTensor()
+        transform=modelTrainingTransforms[args.model][1]
     ) 
 
     #-------------------------------- Intializing the Data Loader --------------------------------#
