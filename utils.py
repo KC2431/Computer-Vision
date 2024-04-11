@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 from PIL import Image
 import natsort
 import os
-import io
+import skimage.io as io
 import pandas as pd
 
 
