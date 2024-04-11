@@ -2,12 +2,14 @@ import argparse
 import json
 import torch
 import torch.utils
-from models import *
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets
 from torchvision.models import resnet50, vgg19
 from torchvision import transforms
 from torch.optim import Adam, Adagrad, SGD
+
+from models import *
+from train_model import *
 from utils import *
 
 if __name__ == "__main__":
@@ -133,14 +135,10 @@ if __name__ == "__main__":
         'BasicMLP': [
                         transforms.Compose([
                                 transforms.ToTensor(),
-                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                    std=[0.229, 0.224, 0.225])  
                             ]),
 
                             transforms.Compose([
                                 transforms.ToTensor(),
-                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                    std=[0.229, 0.224, 0.225])  
                             ])
                         ] 
     
@@ -164,15 +162,7 @@ if __name__ == "__main__":
             transform=modelTrainingTransforms[args.model][1]
         ) 
 
-        trainLoader = DataLoader(dataset=trainingData,
-                                 batch_size=args.batchSize,
-                                 shuffle=True,
-                                 num_workers=args.numWorkers)
-        
-        testLoader = DataLoader(dataset=testData,
-                                batch_size=args.batchSize,
-                                shuffle=False,
-                                num_workers=args.numWorkers)
+        isANN = True
 
     elif args.dataSet == 'CIFAR10':
 
@@ -190,6 +180,8 @@ if __name__ == "__main__":
             transform=modelTrainingTransforms[args.model][1]
         )
         
+        isANN = False
+
     elif args.dataSet == 'CIFAR100':
 
         trainingData = datasets.CIFAR100(
@@ -206,10 +198,12 @@ if __name__ == "__main__":
             transform=modelTrainingTransforms[args.model][1]
         )
 
+        isANN = False
+
     elif args.dataSet == 'NIPS2017':
         
-        dataset = CustomDataset(img_dir='Data/neurips2017/images',
-                             csv_file='Data/neurips2017/images.csv',
+        dataset = CustomDataset(img_dir='./Data/NIPS2017/images',
+                             csv_file='./Data/NIPS2017/images.csv',
                              transform=transforms.ToTensor()
                              )
         
@@ -221,6 +215,7 @@ if __name__ == "__main__":
         testData = torch.utils.data.dataset.Subset(dataset, list(range(800, 1000)))
         testData.dataset.transform = transforms.Lambda(lambda x: apply_transforms_to_tensor(x, modelTrainingTransforms[args.model][1]))
 
+        isANN = False
         
     trainLoader = DataLoader(dataset=trainingData,
                                  batch_size=args.batchSize,
@@ -241,7 +236,10 @@ if __name__ == "__main__":
         model=vgg19(weights=None)
 
     elif args.model == 'BasicCNN':
-        model=getBasicCNN()
+        if args.dataSet == 'CIFAR10':
+            model=getBasicCNN(num_classes=10)
+        elif args.dataSet == 'CIFAR100':
+            model=getBasicCNN(num_classes=100)
 
     elif args.model == 'ResNet20':
         if args.dataSet == 'CIFAR10':
@@ -267,8 +265,25 @@ if __name__ == "__main__":
         optim=Adagrad(params=model.parameters(), lr=1e-2)
 
     else:
-        optim=Adam(params=model.parameters(), lr=1e-3)
+        optim=Adam(params=model.parameters(), lr=1e-2)
 
     #-------------------------------- Initialising the loss function and parameters --------------------------------#
     
-    lossFunction = torch.nn.CrossEntropyLoss()
+    lossFunction=torch.nn.CrossEntropyLoss()
+
+    device='cuda:0' if torch.cuda.is_available() else 'cpu'
+    saveModel = False if args.saveModel == 0 else True
+
+    trainModel=TrainModel(model=model,
+                          maxIters=args.maxIterations,
+                          device=device,
+                           trainDataloader=trainLoader,
+                           testDataloader=testLoader,
+                           saveModel=saveModel,
+                           optim=optim,
+                           lossFunction=lossFunction,
+                           isANN=isANN,
+                           ver=True
+                           )
+    trainModel.train()
+     
