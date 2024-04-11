@@ -1,36 +1,9 @@
 {
-    "BasicCNN": {
-        "DataSet": "CIFAR10",
-        "Optimizer": "Adam",
-        "BatchSize": 1000,
-        "NumBatches": 100
-    },
-    
-    "ResNet20": {
-        "DataSet": "CIFAR10",
-        "Optimizer": "Adam",
-        "BatchSize": 1000,
-        "NumBatches": 100
+    "VGG19": {
+        "weights": "None"
     },
 
     "ResNet50": {
-        "DataSet": "CIFAR10",
-        "Optimizer": "Adam",
-        "BatchSize": 1000,
-        "NumBatches": 100
-    },
-
-    "VGG19": {
-        "DataSet": "CIFAR10",
-        "Optimizer": "Adam",
-        "BatchSize": 1000,
-        "NumBatches": 100
-    },
-    
-    "WideResNet": {
-        "DataSet": "CIFAR10",
-        "Optimizer": "Adam",
-        "BatchSize": 1000,
-        "NumBatches": 100
+        "weights": "None"
     }
 }

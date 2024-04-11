@@ -5,6 +5,7 @@ import torch.utils
 from models import *
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets
+from torchvision.models import resnet50, vgg19
 from torchvision import transforms
 from torch.optim import Adam, Adagrad, SGD
 from utils import *
@@ -197,11 +198,11 @@ if __name__ == "__main__":
         
         trainingData, testData = torch.utils.data.random_split(dataset,[800, 200])
         
-        trainDataTransform = modelTrainingTransforms[args.model][0]
-        trainingData = trainDataTransform(trainingData)
+        trainingData = torch.utils.data.dataset.Subset(dataset, list(range(800)))
+        trainingData.dataset.transform = transforms.Lambda(lambda x: apply_transforms_to_tensor(x, modelTrainingTransforms[args.model][0]))
 
-        testDataTransform = modelTrainingTransforms[args.model][1]
-        testData = testDataTransform(testData)
+        testData = torch.utils.data.dataset.Subset(dataset, list(range(800, 1000)))
+        testData.dataset.transform = transforms.Lambda(lambda x: apply_transforms_to_tensor(x, modelTrainingTransforms[args.model][1]))
 
         
     trainLoader = DataLoader(dataset=trainingData,
@@ -210,8 +211,34 @@ if __name__ == "__main__":
                                  num_workers=args.numWorkers)
         
     testLoader = DataLoader(dataset=testData,
-                                batch=args.batchSize,
+                                batch_size=args.batchSize,
                                 shuffle=False,
                                 num_workers=args.numWorkers)
         
-    
+    #-------------------------------- Initialising the model and optimizer --------------------------------#
+
+    if args.model == 'ResNet50':
+        model=resnet50(weights=None)
+
+    elif args.model == 'VGG19':
+        model=vgg19(weights=None)
+
+    elif args.model == 'BasicCNN':
+        model=getBasicCNN()
+
+    elif args.model == 'ResNet20':
+        model=ResNet20()
+
+    else:
+        model=WideResNet()
+
+
+    if args.optim == 'SGD':
+        optim=SGD(params=model.parameters(), lr=1e-2)
+
+    elif args.optim == 'Adagrad':
+        optim=Adagrad(params=model.parameters(), lr=1e-2)
+
+    else:
+        optim=Adam(params=model.parameters(), lr=1e-3)
+
