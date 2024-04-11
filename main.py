@@ -1,11 +1,13 @@
 import argparse
 import json
 import torch
+import torch.utils
 from models import *
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets
 from torchvision import transforms
 from torch.optim import Adam, Adagrad, SGD
+from utils import *
 
 if __name__ == "__main__":
 
@@ -21,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--optim', choices=['SGD', 'Adam', 'Adagrad'], type=str, required=True)
     parser.add_argument('--maxIterations', type=int, required=True)
     parser.add_argument('--batchSize', type=int, required=True)
+    parser.add_argument('--numWorkers',type=int, required=True)
 
     args = parser.parse_args()
 
@@ -28,13 +31,13 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if use_gpu else "cpu")
 
     if args.dataSet in ['ImageNet', 'NIPS2017'] and args.model in ['ResNet20', 'WideResNet', 'BasicCNN']:
-        raise ValueError(f"Can't use model {args.model} for dataset {args.dataset}.")
+        raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}.")
     elif args.dataSet == 'CIFAR10' and args.model in ['ResNet50', 'VGG19']:
-        raise ValueError(f"Can't use model {args.model} for dataset {args.dataset}.")   
+        raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}.")   
     elif args.dataSet == 'MNIST' and args.model in ['ResNet50', 'VGG19', 'ResNet20', 'WideResNet']:
         raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}")
 
-    #-------------------------------- Reading Data --------------------------------#
+    #-------------------------------- Model Transformations --------------------------------#
     
     # Here, the first value is the training transformation and the second one is the test transformation
     modelTrainingTransforms = {
@@ -124,24 +127,91 @@ if __name__ == "__main__":
                         ] 
     
     }
-
-    training_data = datasets.MNIST(
-        root="data",
-        train=True,
-        download=True,
-        transform=modelTrainingTransforms[args.model][0]
-    )
-
-    test_data = datasets.MNIST(
-        root="data",
-        train=False,
-        download=True,
-        transform=modelTrainingTransforms[args.model][1]
-    ) 
-
-    #-------------------------------- Intializing the Data Loader --------------------------------#
-
     
+    #-------------------------------- Initialising the dataset and dataloader --------------------------------#
+    
+    if args.dataSet == "MNIST":
 
-    batchSize=100
-    dataLoader=DataLoader()
+        trainingData = datasets.MNIST(
+            root="Data",
+            train=True,
+            download=True,
+            transform=modelTrainingTransforms[args.model][0]
+        )
+
+        testData = datasets.MNIST(
+            root="Data",
+            train=False,
+            download=True,
+            transform=modelTrainingTransforms[args.model][1]
+        ) 
+
+        trainLoader = DataLoader(dataset=trainingData,
+                                 batch_size=args.batchSize,
+                                 shuffle=True,
+                                 num_workers=args.numWorkers)
+        
+        testLoader = DataLoader(dataset=testData,
+                                batch=args.batchSize,
+                                shuffle=False,
+                                num_workers=args.numWorkers)
+
+    elif args.dataSet == 'CIFAR10':
+
+        trainingData = datasets.CIFAR10(
+            root="Data",
+            train=True,
+            download=True,
+            transform=modelTrainingTransforms[args.model][0]
+        )
+
+        testData = datasets.CIFAR10(
+            root="Data",
+            train=False,
+            download=True,
+            transform=modelTrainingTransforms[args.model][1]
+        )
+        
+    elif args.dataSet == 'CIFAR100':
+
+        trainingData = datasets.CIFAR100(
+            root="Data",
+            train=True,
+            download=True,
+            transform=modelTrainingTransforms[args.model][0]
+        )
+
+        testData = datasets.CIFAR100(
+            root="Data",
+            train=False,
+            download=True,
+            transform=modelTrainingTransforms[args.model][1]
+        )
+
+    elif args.dataSet == 'NIPS2017':
+        
+        dataset = CustomDataset(img_dir='Data/neurips2017/images',
+                             csv_file='Data/neurips2017/images.csv',
+                             transform=transforms.ToTensor()
+                             )
+        
+        trainingData, testData = torch.utils.data.random_split(dataset,[800, 200])
+        
+        trainDataTransform = modelTrainingTransforms[args.model][0]
+        trainingData = trainDataTransform(trainingData)
+
+        testDataTransform = modelTrainingTransforms[args.model][1]
+        testData = testDataTransform(testData)
+
+        
+    trainLoader = DataLoader(dataset=trainingData,
+                                 batch_size=args.batchSize,
+                                 shuffle=True,
+                                 num_workers=args.numWorkers)
+        
+    testLoader = DataLoader(dataset=testData,
+                                batch=args.batchSize,
+                                shuffle=False,
+                                num_workers=args.numWorkers)
+        
+    
