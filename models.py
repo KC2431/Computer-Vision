@@ -4,20 +4,14 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 
-class CAMNet(nn.Module):
-    '''
-    Class for the last fully connected layer of CNNs used for computing the
-    class activation map.
-    '''
-    def __init__(self, numclasses=1000, latent_dim=512):
-        super().__init__()
-        self.fc = nn.Linear(latent_dim, numclasses, bias=False)
-
-    def forward(self, x):
-        sh = x.shape
-        x = x.view(*sh[:2], sh[2] * sh[3]).mean(-1).view(sh[0], -1)
-        x = self.fc(x)
-        return F.softmax(x, dim=1)
+def getBasicMLP():
+    return nn.Sequential(nn.Linear(in_features=784, out_features=120),
+                         nn.ReLU(),
+                         nn.Linear(in_features=120, out_features=84),
+                         nn.ReLU(),
+                         nn.Linear(in_features=84, out_features=48),
+                         nn.ReLU(),
+                         nn.Linear(48,10))
 
 
 def getBasicCNN():
