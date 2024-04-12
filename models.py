@@ -14,7 +14,7 @@ def getBasicMLP():
                          nn.Linear(48,10))
 
 
-def getBasicCNN():
+def getBasicCNN(num_classes=10):
     return nn.Sequential(nn.Conv2d(3, 64, 3),
                          nn.ReLU(),
                          nn.Conv2d(64, 64, 3),
@@ -27,7 +27,7 @@ def getBasicCNN():
                          nn.MaxPool2d(2),
                          nn.Flatten(),
                          nn.Linear(3200, 256),
-                         nn.Linear(256, 10))
+                         nn.Linear(256, num_classes))
     
 
 class ResBlock(nn.Module):
