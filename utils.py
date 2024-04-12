@@ -13,22 +13,23 @@ def apply_transforms_to_tensor(sample, transform):
     return (image, label)
 
 
-class CustomDataset(Dataset):
-    def __init__(self, img_dir, csv_file, transform):
-        self.file = pd.read_csv(csv_file)
-        self.img_dir = img_dir
+class CustomDataSet(Dataset):
+    '''
+    Dataset class for NIPS2017 images.
+    '''
+    def __init__(self, main_dir, transform, labels):
+        self.main_dir = main_dir
         self.transform = transform
+        all_imgs = os.listdir(main_dir)
+        self.total_imgs = natsort.natsorted(all_imgs)
+        self.labels = labels
 
     def __len__(self):
-        return len(self.file)
+        return len(self.total_imgs)
 
-    def __getitem__(self, index):
-        img_path = os.path.join(self.img_dir,self.file.iloc[index, 0])
-        image = io.imread(img_path)
-        y_label = torch.tensor(int(self.file.iloc[index, 1]))
+    def __getitem__(self, idx):
+        img_loc = os.path.join(self.main_dir, self.labels['ImageId'][idx]) + '.png'
+        image = Image.open(img_loc).convert("RGB")
+        tensor_image = self.transform(image)
+        return (tensor_image, self.labels['TrueLabel'][idx] - 1)
 
-        if self.transform:
-            image = self.transform(image)
-
-            
-        return (image, y_label)
