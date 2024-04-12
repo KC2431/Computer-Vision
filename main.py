@@ -1,5 +1,6 @@
 import argparse
 import json
+import pandas as pd
 import torch
 import torch.utils
 from torch.utils.data import DataLoader, Dataset
@@ -69,13 +70,13 @@ if __name__ == "__main__":
         
         'ResNet50': [
                         transforms.Compose([
-                           transforms.Resize(224),
-                           transforms.RandomRotation(5),
-                           transforms.RandomHorizontalFlip(0.5),
-                           transforms.RandomCrop(224, padding = 10),
+                           transforms.Resize(255),
+                           transforms.CenterCrop(224),
+                           transforms.RandomHorizontalFlip(),
+                           transforms.RandomRotation(20),
                            transforms.ToTensor(),
-                           transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                                                std=[0.229, 0.224, 0.225])
+                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                 std=[0.229, 0.224, 0.225])
                        ]),
 
                         transforms.Compose([
@@ -202,18 +203,14 @@ if __name__ == "__main__":
 
     elif args.dataSet == 'NIPS2017':
         
-        dataset = CustomDataset(img_dir='./Data/NIPS2017/images',
-                             csv_file='./Data/NIPS2017/images.csv',
-                             transform=transforms.ToTensor()
+        NIPlabels = pd.read_csv('./Data/NIPS2017/images.csv')
+        trainingData = CustomDataSet(main_dir='./Data/NIPS2017/images',
+                             labels=NIPlabels,
+                             transform=modelTrainingTransforms[args.model][0]
                              )
-        
-        trainingData, testData = torch.utils.data.random_split(dataset,[800, 200])
-        
-        trainingData = torch.utils.data.dataset.Subset(dataset, list(range(800)))
-        trainingData.dataset.transform = transforms.Lambda(lambda x: apply_transforms_to_tensor(x, modelTrainingTransforms[args.model][0]))
-
-        testData = torch.utils.data.dataset.Subset(dataset, list(range(800, 1000)))
-        testData.dataset.transform = transforms.Lambda(lambda x: apply_transforms_to_tensor(x, modelTrainingTransforms[args.model][1]))
+        testData = CustomDataSet(main_dir='./Data/NIPS2017/images',
+                             labels=NIPlabels,
+                             transform=modelTrainingTransforms[args.model][1])        
 
         isANN = False
         
@@ -285,5 +282,8 @@ if __name__ == "__main__":
                            isANN=isANN,
                            ver=True
                            )
-    trainModel.train()
+    trainModel.train(args)
+    
+    if saveModel:
+        print(f"The model has been saved in the Trained_Models directory.")
      
