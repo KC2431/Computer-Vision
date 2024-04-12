@@ -67,7 +67,7 @@ class TrainModel():
         
         self.evalModel()
         if self.saveModel:
-            torch.save(self.model.state_dict(), f'Trained_Models/{args.model}_{args.dataSet}_trained_model.pt')    
+            torch.save(self.model.state_dict(), f'Trained_Models/{args.model}_{args.dataSet}_{args.optim}_trained_model.pt')    
 
     def evalModel(self):
 
