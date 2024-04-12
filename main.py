@@ -8,6 +8,8 @@ from torchvision import datasets
 from torchvision.models import resnet50, vgg19
 from torchvision import transforms
 from torch.optim import Adam, Adagrad, SGD
+import warnings
+warnings.filterwarnings("ignore") 
 
 from models import *
 from train_model import *
@@ -31,6 +33,7 @@ if __name__ == "__main__":
     parser.add_argument('--saveModel', choices=[0, 1],help=('Set it to 1 to save the trained model otherwise 0.'),
                         type=int, 
                         required=True)
+    parser.add_argument('--ver', choices=[0, 1], help=("Set to 1 to display information otherwise 0."),type=int, required=True)
 
     args = parser.parse_args()
 
@@ -170,14 +173,14 @@ if __name__ == "__main__":
         trainingData = datasets.CIFAR10(
             root="Data",
             train=True,
-            download=True,
+            download=False,
             transform=modelTrainingTransforms[args.model][0]
         )
 
         testData = datasets.CIFAR10(
             root="Data",
             train=False,
-            download=True,
+            download=False,
             transform=modelTrainingTransforms[args.model][1]
         )
         
@@ -188,14 +191,14 @@ if __name__ == "__main__":
         trainingData = datasets.CIFAR100(
             root="Data",
             train=True,
-            download=True,
+            download=False,
             transform=modelTrainingTransforms[args.model][0]
         )
 
         testData = datasets.CIFAR100(
             root="Data",
             train=False,
-            download=True,
+            download=False,
             transform=modelTrainingTransforms[args.model][1]
         )
 
@@ -217,11 +220,13 @@ if __name__ == "__main__":
     trainLoader = DataLoader(dataset=trainingData,
                                  batch_size=args.batchSize,
                                  shuffle=True,
+                                 pin_memory=True,
                                  num_workers=args.numWorkers)
         
     testLoader = DataLoader(dataset=testData,
                                 batch_size=args.batchSize,
                                 shuffle=False,
+                                pin_memory=True,
                                 num_workers=args.numWorkers)
         
     #-------------------------------- Initialising the model --------------------------------#
@@ -271,6 +276,8 @@ if __name__ == "__main__":
     device='cuda:0' if torch.cuda.is_available() else 'cpu'
     saveModel = False if args.saveModel == 0 else True
 
+    ver = True if args.ver == 1 else 0
+
     trainModel=TrainModel(model=model,
                           maxIters=args.maxIterations,
                           device=device,
@@ -280,7 +287,7 @@ if __name__ == "__main__":
                            optim=optim,
                            lossFunction=lossFunction,
                            isANN=isANN,
-                           ver=True
+                           ver=ver
                            )
     trainModel.train(args)
     

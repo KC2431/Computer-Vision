@@ -1,5 +1,8 @@
 import torch
+from torch.optim.lr_scheduler import StepLR
 from tqdm import tqdm
+
+
 
 class TrainModel():
     def __init__(self, 
@@ -26,12 +29,16 @@ class TrainModel():
         self.isANN = isANN
 
     def train(self, args):
+        if self.ver:
+            print(f"DataSet: {args.dataSet} | Model: {args.model} | Max Epochs: {args.maxIterations} | Optimizer: {args.optim}")
+
         self.model = self.model.to(self.device)
 
         for epoch in range(self.maxIters):
+            scheduler = StepLR(self.optim, step_size=int(self.maxIters/2), gamma=0.1)
 
             trainingLoop = tqdm(iterable=enumerate(self.trainDataloader), 
-                            leave=True,
+                            leave=False,
                             total=len(self.trainDataloader))
 
             for _, (x, y) in trainingLoop:
@@ -45,16 +52,53 @@ class TrainModel():
                 pred = self.model(x)
                 loss = self.lossFunction(pred, y)
 
-                self.optim.zero_grad()
+                for param in self.model.parameters():
+                    param.grad = None
                 loss.backward()
+                
+                torch.nn.utils.clip_grad_norm(self.model.parameters(), max_norm=1)
                 self.optim.step()
-
-                with torch.no_grad():
-                    mask = (torch.argmax(pred, dim=1) == y)
-                    acc = mask.float().mean()
+                
 
                 trainingLoop.set_description(f"[Epoch {epoch+1}/{self.maxIters}]")
-                trainingLoop.set_postfix(loss=loss.item(), acc=acc.item())
-
+                trainingLoop.set_postfix(loss=loss.item())
+        
+            scheduler.step()
+        
+        self.evalModel()
         if self.saveModel:
             torch.save(self.model.state_dict(), f'Trained_Models/{args.model}_{args.dataSet}_trained_model.pt')    
+
+    def evalModel(self):
+
+        self.model.eval()
+
+        testLoop = tqdm(iterable=enumerate(self.testDataloader), 
+                            leave=False,
+                            total=len(self.testDataloader))
+
+        num_correct = 0
+        num_samples = 0
+
+        for _, (x, y) in testLoop:
+
+            with torch.no_grad():
+                x = x.to(self.device)
+                y = y.to(self.device)
+
+                if self.isANN:
+                    x = x.reshape(x.shape[0], -1)
+
+                pred = self.model(x)
+                
+                num_correct += (torch.argmax(pred, dim=1) == y).sum()
+                num_samples += x.shape[0]
+        
+        if self.ver:
+            accuracy = num_correct / num_samples * 100
+            formatted_accuracy = "{:.2f}".format(accuracy)
+
+            print(f"The total accuracy is {formatted_accuracy}%")
+
+
+
