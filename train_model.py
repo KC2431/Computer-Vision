@@ -25,7 +25,7 @@ class TrainModel():
         self.optim = optim
         self.isANN = isANN
 
-    def train(self):
+    def train(self, args):
         self.model = self.model.to(self.device)
 
         for epoch in range(self.maxIters):
@@ -56,4 +56,5 @@ class TrainModel():
                 trainingLoop.set_description(f"[Epoch {epoch+1}/{self.maxIters}]")
                 trainingLoop.set_postfix(loss=loss.item(), acc=acc.item())
 
-            
+        if self.saveModel:
+            torch.save(self.model.state_dict(), f'Trained_Models/{args.model}_{args.dataSet}_trained_model.pt')    
