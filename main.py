@@ -231,6 +231,8 @@ if __name__ == "__main__":
         
     #-------------------------------- Initialising the model --------------------------------#
 
+    device='cuda:0' if torch.cuda.is_available() else 'cpu'
+
     if args.model == 'ResNet50':
         model=resnet50(weights=None)
 
@@ -258,6 +260,8 @@ if __name__ == "__main__":
     else:
         model=getBasicMLP()
 
+    model = model.to(device)
+
     #-------------------------------- Initialising the optimizer --------------------------------#
 
     if args.optim == 'SGD':
@@ -272,10 +276,7 @@ if __name__ == "__main__":
     #-------------------------------- Initialising the loss function and parameters --------------------------------#
     
     lossFunction=torch.nn.CrossEntropyLoss()
-
-    device='cuda:0' if torch.cuda.is_available() else 'cpu'
     saveModel = False if args.saveModel == 0 else True
-
     ver = True if args.ver == 1 else 0
 
     trainModel=TrainModel(model=model,

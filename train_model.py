@@ -32,8 +32,6 @@ class TrainModel():
         if self.ver:
             print(f"DataSet: {args.dataSet} | Model: {args.model} | Max Epochs: {args.maxIterations} | Optimizer: {args.optim}")
 
-        self.model = self.model.to(self.device)
-
         for epoch in range(self.maxIters):
             scheduler = StepLR(self.optim, step_size=int(self.maxIters/2), gamma=0.1)
 
