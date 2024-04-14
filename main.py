@@ -46,7 +46,8 @@ if __name__ == "__main__":
         raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}.")   
     elif args.dataSet == 'MNIST' and args.model in ['ResNet50', 'VGG19', 'ResNet20', 'WideResNet','BasicCNN']:
         raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}")
-    
+    elif args.dataSet == 'ImageNet' and args.model not in ['ResNet50', 'VGG19']:
+        raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}.")
     #-------------------------------- Model Transformations --------------------------------#
     
     # Here, the first value is the training transformation and the second one is the test transformation
@@ -216,7 +217,14 @@ if __name__ == "__main__":
                              transform=modelTrainingTransforms[args.model][1])        
 
         isANN = False
-        
+    
+    elif args.dataSet == 'ImageNet':
+
+        trainingData = datasets.ImageNet(root='/software/ais2t/pytorch_datasets/imagenet/', split='train', transform=modelTrainingTransforms[args.model][0])
+        testData = datasets.ImageNet(root='/software/ais2t/pytorch_datasets/imagenet/', split='val', transform=modelTrainingTransforms[args.model][1])
+
+        isANN=False
+    
     trainLoader = DataLoader(dataset=trainingData,
                                  batch_size=args.batchSize,
                                  shuffle=True,
