@@ -271,15 +271,16 @@ if __name__ == "__main__":
     model = model.to(device)
 
     #-------------------------------- Initialising the optimizer --------------------------------#
-
+    
+    weightDecay = 5e-4
     if args.optim == 'SGD':
-        optim=SGD(params=model.parameters(), lr=1e-2)
+        optim=SGD(params=model.parameters(), lr=1e-2, weight_decay=weightDecay)
 
     elif args.optim == 'Adagrad':
-        optim=Adagrad(params=model.parameters(), lr=1e-2)
+        optim=Adagrad(params=model.parameters(), lr=1e-2, weight_decay=weightDecay)
 
     else:
-        optim=Adam(params=model.parameters(), lr=1e-2)
+        optim=Adam(params=model.parameters(), lr=1e-2, weight_decay=weightDecay)
 
     #-------------------------------- Initialising the loss function and parameters --------------------------------#
     
