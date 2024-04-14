@@ -49,12 +49,11 @@ class TrainModel():
 
                 pred = self.model(x)
                 loss = self.lossFunction(pred, y)
-
+                
                 for param in self.model.parameters():
                     param.grad = None
-                loss.backward()
                 
-                torch.nn.utils.clip_grad_norm(self.model.parameters(), max_norm=1)
+                loss.backward()
                 self.optim.step()
                 
 
