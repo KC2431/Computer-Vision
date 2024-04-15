@@ -220,8 +220,12 @@ if __name__ == "__main__":
     
     elif args.dataSet == 'ImageNet':
 
-        trainingData = datasets.ImageNet(root='/software/ais2t/pytorch_datasets/imagenet/', split='train', transform=modelTrainingTransforms[args.model][0])
-        testData = datasets.ImageNet(root='/software/ais2t/pytorch_datasets/imagenet/', split='val', transform=modelTrainingTransforms[args.model][1])
+        trainingData = datasets.ImageNet(root='/software/ais2t/pytorch_datasets/imagenet/',
+                                         split='train', 
+                                         transform=modelTrainingTransforms[args.model][0])
+        testData = datasets.ImageNet(root='/software/ais2t/pytorch_datasets/imagenet/', 
+                                     split='val', 
+                                     transform=modelTrainingTransforms[args.model][1])
 
         isANN=False
     
@@ -243,9 +247,11 @@ if __name__ == "__main__":
 
     if args.model == 'ResNet50':
         model=resnet50(weights=None)
+        model.apply(init_weights)
 
     elif args.model == 'VGG19':
         model=vgg19(weights=None)
+        model.apply(init_weights)
 
     elif args.model == 'BasicCNN':
         if args.dataSet == 'CIFAR10':
@@ -272,15 +278,26 @@ if __name__ == "__main__":
 
     #-------------------------------- Initialising the optimizer --------------------------------#
     
+    lr=1e-2
     weightDecay = 5e-4
+    
     if args.optim == 'SGD':
-        optim=SGD(params=model.parameters(), lr=1e-2, weight_decay=weightDecay)
+        optim=SGD(params=model.parameters(),
+                  lr=lr, 
+                  weight_decay=weightDecay
+                )
 
     elif args.optim == 'Adagrad':
-        optim=Adagrad(params=model.parameters(), lr=1e-2, weight_decay=weightDecay)
+        optim=Adagrad(params=model.parameters(),
+                      lr=lr, 
+                      weight_decay=weightDecay
+                    )
 
     else:
-        optim=Adam(params=model.parameters(), lr=1e-2, weight_decay=weightDecay)
+        optim=Adam(params=model.parameters(), 
+                   lr=lr, 
+                   weight_decay=weightDecay
+                )
 
     #-------------------------------- Initialising the loss function and parameters --------------------------------#
     

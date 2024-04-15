@@ -55,7 +55,6 @@ class TrainModel():
                 
                 loss.backward()
                 self.optim.step()
-                
 
                 trainingLoop.set_description(f"[Epoch {epoch+1}/{self.maxIters}]")
                 trainingLoop.set_postfix(loss=loss.item())

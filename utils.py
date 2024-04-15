@@ -6,11 +6,10 @@ import os
 import skimage.io as io
 import pandas as pd
 
-
-def apply_transforms_to_tensor(sample, transform):
-    image, label = sample
-    image = transform(image)
-    return (image, label)
+def init_weights(m):
+    if isinstance(m, torch.nn.Linear) or isinstance(m, torch.nn.Conv2d):
+        torch.nn.init.xavier_uniform(m.weight)
+        m.bias.data.fill_(0.)
 
 
 class CustomDataSet(Dataset):
