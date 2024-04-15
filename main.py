@@ -5,7 +5,7 @@ import torch
 import torch.utils
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets
-from torchvision.models import resnet50, vgg19
+from torchvision.models import resnet50, vgg19, resnet18
 from torchvision import transforms
 from torch.optim import Adam, Adagrad, SGD
 import warnings
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     #-------------------------------- Reading in the command line arguments --------------------------------#
     
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--model', choices=['ResNet50', 'VGG19', 'ResNet20', 'WideResNet', 'BasicCNN','BasicMLP'],
+    parser.add_argument('--model', choices=['ResNet50', 'VGG19', 'ResNet20', 'WideResNet', 'BasicCNN','BasicMLP', 'ResNet18', 'BasicLeNet', 'SmallCNN'],
                         help=('Choices ResNet50 and VGG19 for ImageNet or NIPS2017 datasets.'
                               'Choices ResNet20, WideResNet and BasicCNN for CIFAR10 and CIFAR100 datasets.'
                               'BasicMLP for MNIST.'), type=str, required=True)
@@ -145,7 +145,27 @@ if __name__ == "__main__":
                             transforms.Compose([
                                 transforms.ToTensor(),
                             ])
-                        ] 
+                        ],
+
+        'BasicLeNet': [
+                        transforms.Compose([
+                                transforms.ToTensor(),
+                            ]),
+
+                            transforms.Compose([
+                                transforms.ToTensor(),
+                            ])
+                        ],
+
+        'SmallCNN': [
+                        transforms.Compose([
+                                transforms.ToTensor(),
+                            ]),
+
+                            transforms.Compose([
+                                transforms.ToTensor(),
+                            ])
+                        ]
     
     }
     
@@ -167,7 +187,10 @@ if __name__ == "__main__":
             transform=modelTrainingTransforms[args.model][1]
         ) 
 
-        isANN = True
+        if args.model in ['BasicLeNet', 'SmallCNN']:
+            isANN = False
+        else:
+            isANN = True
 
     elif args.dataSet == 'CIFAR10':
 
@@ -270,6 +293,12 @@ if __name__ == "__main__":
             model=WideResNet(num_classes=10)
         elif args.dataSet == 'CIFAR100':
             model=WideResNet(num_classes=100)
+
+    elif args.model == 'BasicLeNet':
+        model=getLeNet()
+
+    elif args.model == 'SmallCNN':
+        model=getSmallCNN()
 
     else:
         model=getBasicMLP()
