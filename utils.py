@@ -9,8 +9,8 @@ import pandas as pd
 def init_weights(m):
     if isinstance(m, torch.nn.Linear) or isinstance(m, torch.nn.Conv2d):
         torch.nn.init.xavier_uniform(m.weight)
-        m.bias.data.fill_(0.)
-
+        if m.bias is not None:  
+            torch.nn.init.constant_(m.bias, 0)
 
 class CustomDataSet(Dataset):
     '''

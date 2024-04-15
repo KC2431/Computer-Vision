@@ -246,11 +246,11 @@ if __name__ == "__main__":
     device='cuda:0' if torch.cuda.is_available() else 'cpu'
 
     if args.model == 'ResNet50':
-        model=resnet50(weights=None)
+        model=resnet50()
         model.apply(init_weights)
 
     elif args.model == 'VGG19':
-        model=vgg19(weights=None)
+        model=vgg19()
         model.apply(init_weights)
 
     elif args.model == 'BasicCNN':
