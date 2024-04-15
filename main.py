@@ -40,9 +40,9 @@ if __name__ == "__main__":
     use_gpu = torch.cuda.is_available()
     device = torch.device("cuda:0" if use_gpu else "cpu")
 
-    if args.dataSet in ['ImageNet', 'NIPS2017'] and args.model in ['ResNet20', 'WideResNet', 'BasicCNN','BasicMLP']:
+    if args.dataSet in ['ImageNet', 'NIPS2017'] and args.model in ['ResNet20', 'WideResNet', 'BasicCNN','BasicMLP','SmallCNN', 'BasicLeNet']:
         raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}.")
-    elif (args.dataSet == 'CIFAR10' or args.dataSet == 'CIFAR100') and args.model in ['ResNet50', 'VGG19', 'BasicMLP']:
+    elif (args.dataSet == 'CIFAR10' or args.dataSet == 'CIFAR100') and args.model in ['ResNet50', 'VGG19', 'BasicMLP', 'SmallCNN', 'BasicLeNet']:
         raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}.")   
     elif args.dataSet == 'MNIST' and args.model in ['ResNet50', 'VGG19', 'ResNet20', 'WideResNet','BasicCNN']:
         raise ValueError(f"Can't use model {args.model} for dataset {args.dataSet}")
@@ -94,8 +94,8 @@ if __name__ == "__main__":
         
         'ResNet20':  [
                             transforms.Compose([
-                                transforms.RandomHorizontalFlip(),
                                 transforms.RandomCrop(32, 4),
+                                transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),
                                 transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                         std=[0.229, 0.224, 0.225])
@@ -111,8 +111,8 @@ if __name__ == "__main__":
 
         'ResNet18':  [
                             transforms.Compose([
-                                transforms.RandomAffine(degrees=20, scale=(1.1, 1.1)),
-                                transforms.RandomCrop((28, 28), padding=2, pad_if_needed=True, fill=0, padding_mode='constant'),
+                                transforms.RandomCrop(32, padding=4),
+                                transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),
                                 transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                         std=[0.229, 0.224, 0.225])
@@ -287,7 +287,6 @@ if __name__ == "__main__":
 
     if args.model == 'ResNet50':
         model=resnet50()
-        model.apply(init_weights)
 
     elif args.model == 'VGG19':
         model=vgg19()
@@ -321,7 +320,7 @@ if __name__ == "__main__":
         model=getBasicMLP()
     
     elif args.model == 'ResNet18':
-        model=resnet50()
+        model=resnet18()
         model.apply(init_weights)
 
     model = model.to(device)
