@@ -107,7 +107,24 @@ if __name__ == "__main__":
                                                     std=[0.229, 0.224, 0.225])  
                             ])
 
-                        ],   
+                        ],  
+
+        'ResNet18':  [
+                            transforms.Compose([
+                                transforms.RandomAffine(degrees=20, scale=(1.1, 1.1)),
+                                transforms.RandomCrop((28, 28), padding=2, pad_if_needed=True, fill=0, padding_mode='constant'),
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                        std=[0.229, 0.224, 0.225])
+                            ]),
+
+                            transforms.Compose([
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                    std=[0.229, 0.224, 0.225])  
+                            ])
+
+                        ],
 
         'WideResNet': [     
                             transforms.Compose([
@@ -300,8 +317,12 @@ if __name__ == "__main__":
     elif args.model == 'SmallCNN':
         model=getSmallCNN()
 
-    else:
+    elif args.model == 'BasicMLP':
         model=getBasicMLP()
+    
+    elif args.model == 'ResNet18':
+        model=resnet50()
+        model.apply(init_weights)
 
     model = model.to(device)
 
