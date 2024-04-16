@@ -321,6 +321,14 @@ if __name__ == "__main__":
     
     elif args.model == 'ResNet18':
         model=resnet18()
+
+        if args.dataSet == 'CIFAR10':
+            inFeatures = model.fc.in_features
+            model.fc = nn.Linear(inFeatures, 10)
+        elif args.dataSet == 'CIFAR100':
+            inFeatures = model.fc.in_features
+            model.fc = nn.Linear(inFeatures, 100)
+
         model.apply(init_weights)
 
     model = model.to(device)
