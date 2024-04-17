@@ -25,7 +25,7 @@ if __name__ == "__main__":
                               'BasicMLP for MNIST.'), type=str, required=True)
     parser.add_argument('--dataSet', choices=['CIFAR10', 'CIFAR100', 'NIPS2017', 'ImageNet', 'MNIST']
                         , type=str, required=True)
-    parser.add_argument('--optim', choices=['SGD', 'Adam', 'Adagrad'], type=str, required=True)
+    parser.add_argument('--optim', choices=['SGD', 'Adam', 'Adagrad', 'NAG'], type=str, required=True)
     parser.add_argument('--maxIterations', type=int, required=True)
     parser.add_argument('--batchSize', type=int, required=True)
     parser.add_argument('--numWorkers',type=int, required=True)
@@ -349,12 +349,14 @@ if __name__ == "__main__":
                       weight_decay=weightDecay
                     )
 
-    else:
+    elif args.optim == 'Adam':
         optim=Adam(params=model.parameters(), 
                    lr=lr, 
                    weight_decay=weightDecay
                 )
 
+    else:
+        optim=MyNesterovMomentumSGD(params=model.parameters())
     #-------------------------------- Initialising the loss function and parameters --------------------------------#
     
     lossFunction=torch.nn.CrossEntropyLoss()
