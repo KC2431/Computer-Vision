@@ -33,7 +33,8 @@ class TrainModel():
             print(f"DataSet: {args.dataSet} | Model: {args.model} | Max Epochs: {args.maxIterations} | Optimizer: {args.optim}")
 
         for epoch in range(self.maxIters):
-            scheduler = StepLR(self.optim, step_size=int(self.maxIters/2), gamma=0.1)
+            if args.optim != 'NAG':
+                scheduler = StepLR(self.optim, step_size=int(self.maxIters/2), gamma=0.1)
 
             trainingLoop = tqdm(iterable=enumerate(self.trainDataloader), 
                             leave=False,
@@ -58,8 +59,8 @@ class TrainModel():
 
                 trainingLoop.set_description(f"[Epoch {epoch+1}/{self.maxIters}]")
                 trainingLoop.set_postfix(loss=loss.item())
-        
-            scheduler.step()
+            if args.optim != 'NAG':
+                scheduler.step()
         
         self.evalModel()
         if self.saveModel:
