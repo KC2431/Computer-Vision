@@ -213,14 +213,14 @@ if __name__ == "__main__":
         trainingData = datasets.CIFAR10(
             root="Data",
             train=True,
-            download=False,
+            download=True,
             transform=modelTrainingTransforms[args.model][0]
         )
 
         testData = datasets.CIFAR10(
             root="Data",
             train=False,
-            download=False,
+            download=True,
             transform=modelTrainingTransforms[args.model][1]
         )
         
@@ -231,14 +231,14 @@ if __name__ == "__main__":
         trainingData = datasets.CIFAR100(
             root="Data",
             train=True,
-            download=False,
+            download=True,
             transform=modelTrainingTransforms[args.model][0]
         )
 
         testData = datasets.CIFAR100(
             root="Data",
             train=False,
-            download=False,
+            download=True,
             transform=modelTrainingTransforms[args.model][1]
         )
 
