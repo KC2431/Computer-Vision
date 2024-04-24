@@ -102,7 +102,7 @@ class TrainModel():
             formatted_accuracy = "{:.2f}".format(accuracy)
             
 
-            print(f"Validation accuracy : {formatted_accuracy}% | validation error : {runningLoss/len(self.testDataloader.dataset):.4f}")
+            print(f"Validation accuracy : {formatted_accuracy}% | Validation loss : {runningLoss/len(self.testDataloader.dataset):.4f}")
 
 
 
