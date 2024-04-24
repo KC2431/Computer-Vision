@@ -27,8 +27,42 @@ def getBasicCNN(num_classes=10):
                          nn.MaxPool2d(2),
                          nn.Flatten(),
                          nn.Linear(3200, 256),
+                         nn.ReLU(),
+                         nn.Linear(256, 256),
+                         nn.ReLU(),
                          nn.Linear(256, num_classes))
     
+
+def getSmallCNN():
+    return nn.Sequential(nn.Conv2d(1, 32, 3),
+                         nn.ReLU(),
+                         nn.Conv2d(32, 32, 3),
+                         nn.ReLU(),
+                         nn.MaxPool2d(2),
+                         nn.Conv2d(32, 64, 3),
+                         nn.ReLU(),
+                         nn.Conv2d(64, 64, 3),
+                         nn.ReLU(),
+                         nn.MaxPool2d(2),
+                         nn.Flatten(),
+                         nn.Linear(1024, 200),
+                         nn.ReLU(),
+                         nn.Linear(200, 200),
+                         nn.ReLU(),
+                         nn.Linear(200, 10))
+
+
+def getLeNet():
+    return nn.Sequential(nn.Conv2d(1,32, 3),
+                         nn.ReLU(),
+                         nn.MaxPool2d(2),
+                         nn.Conv2d(32, 64, 3),
+                         nn.ReLU(),
+                         nn.MaxPool2d(2),
+                         nn.Flatten(),
+                         nn.Linear(1600, 1024),
+                         nn.ReLU(),
+                         nn.Linear(1024, 10))
 
 class ResBlock(nn.Module):
     def __init__(self, ins, outs, stride=1):

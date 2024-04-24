@@ -32,14 +32,15 @@ class TrainModel():
         if self.ver:
             print(f"DataSet: {args.dataSet} | Model: {args.model} | Max Epochs: {args.maxIterations} | Optimizer: {args.optim}")
 
+        self.model.train()
+
         for epoch in range(self.maxIters):
-            if args.optim != 'NAG':
-                scheduler = StepLR(self.optim, step_size=int(self.maxIters/2), gamma=0.1)
 
             trainingLoop = tqdm(iterable=enumerate(self.trainDataloader), 
                             leave=False,
                             total=len(self.trainDataloader))
 
+            runningLoss =  0
             for _, (x, y) in trainingLoop:
 
                 x = x.to(self.device)
@@ -57,11 +58,14 @@ class TrainModel():
                 loss.backward()
                 self.optim.step()
 
+                runningLoss += loss.item() * x.size(0)
+
                 trainingLoop.set_description(f"[Epoch {epoch+1}/{self.maxIters}]")
                 trainingLoop.set_postfix(loss=loss.item())
-            if args.optim != 'NAG':
-                scheduler.step()
-        
+
+            if self.ver:
+                print(f"Epoch {epoch+1} | Training Loss = {runningLoss/len(self.trainDataloader.dataset):.4f}")
+
         self.evalModel()
         if self.saveModel:
             torch.save(self.model.state_dict(), f'Trained_Models/{args.model}_{args.dataSet}_{args.optim}_trained_model.pt')    
@@ -76,6 +80,7 @@ class TrainModel():
 
         num_correct = 0
         num_samples = 0
+        runningLoss = 0
 
         for _, (x, y) in testLoop:
 
@@ -87,15 +92,20 @@ class TrainModel():
                     x = x.reshape(x.shape[0], -1)
 
                 pred = self.model(x)
-                
+                loss = self.lossFunction(pred, y)
+
                 num_correct += (torch.argmax(pred, dim=1) == y).sum()
                 num_samples += x.shape[0]
-        
+                runningLoss += loss.item() * x.size(0)
+
+
+
         if self.ver:
             accuracy = num_correct / num_samples * 100
             formatted_accuracy = "{:.2f}".format(accuracy)
+            
 
-            print(f"The total accuracy is {formatted_accuracy}%")
+            print(f"The total accuracy is {formatted_accuracy}% with validation error {runningLoss/len(self.testDataloader.dataset):.4f}")
 
 
 
