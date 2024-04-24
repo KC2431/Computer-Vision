@@ -61,7 +61,6 @@ class TrainModel():
                 runningLoss += loss.item() * x.size(0)
 
                 trainingLoop.set_description(f"[Epoch {epoch+1}/{self.maxIters}]")
-                trainingLoop.set_postfix(loss=loss.item())
 
             if self.ver:
                 print(f"Epoch {epoch+1} | Training Loss = {runningLoss/len(self.trainDataloader.dataset):.4f}")
@@ -98,14 +97,12 @@ class TrainModel():
                 num_samples += x.shape[0]
                 runningLoss += loss.item() * x.size(0)
 
-
-
         if self.ver:
             accuracy = num_correct / num_samples * 100
             formatted_accuracy = "{:.2f}".format(accuracy)
             
 
-            print(f"The total accuracy is {formatted_accuracy}% with validation error {runningLoss/len(self.testDataloader.dataset):.4f}")
+            print(f"Validation accuracy : {formatted_accuracy}% | validation error : {runningLoss/len(self.testDataloader.dataset):.4f}")
 
 
 
