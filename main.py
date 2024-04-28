@@ -334,8 +334,8 @@ if __name__ == "__main__":
 
     #-------------------------------- Initialising the optimizer --------------------------------#
     
-    lr=1e-2
-    weightDecay = 5e-4
+    lr=1e-3
+    weightDecay = 1e-3
     
     if args.optim == 'SGD':
         optim=SGD(params=model.parameters(),
